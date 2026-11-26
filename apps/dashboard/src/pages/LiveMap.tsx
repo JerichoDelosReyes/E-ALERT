@@ -5,6 +5,7 @@ import {
 } from '@e-alert/shared';
 import { RefreshCw, UserPlus } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import MapGL, { Marker, NavigationControl, useControl } from 'react-map-gl/maplibre';
 
 import { AvailPill, Avatar, CAT_ICON, CatBadge, PriorityBar, StatusPill, useCatColors, useDark, usePalette } from '../ui';

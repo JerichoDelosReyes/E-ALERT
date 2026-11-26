@@ -6,7 +6,7 @@ import { AccessibilityInfo, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { EMERGENCY_TYPES } from '@/features/EmergencyTypes';
-import { useApp } from '@/state/app';
+import { appActions } from '@/state/app';
 import { CountdownRing } from '@/ui/CountdownRing';
 import { Icon } from '@/ui/Icon';
 import { Button } from '@/ui/primitives';
@@ -21,7 +21,7 @@ const CATS: Category[] = ['medical', 'fire', 'police', 'disaster'];
  */
 export default function SOSSheet() {
   const c = useColors();
-  const { startIncident } = useApp();
+  const { startIncident } = appActions;
   const { type } = useLocalSearchParams<{ type?: string }>();
   const preset = EMERGENCY_TYPES.find((t) => t.key === type);
   const [cat, setCat] = useState<Category | null>(preset?.category ?? null);

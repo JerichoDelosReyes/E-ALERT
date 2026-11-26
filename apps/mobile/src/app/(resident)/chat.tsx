@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
-import { useApp } from '@/state/app';
+import { useAppState, useUnread } from '@/state/app';
 import { Icon } from '@/ui/Icon';
 import { Avatar, Grouped, LargeTitleScreen, StatusPill } from '@/ui/primitives';
 import { Text } from '@/ui/Text';
@@ -63,11 +63,11 @@ export default function Chats() {
 
 function ThreadRow({ t, last }: { t: ChatThread; last: boolean }) {
   const c = useColors();
-  const { messages, unreadCount } = useApp();
+  const messages = useAppState((s) => s.messages);
   const r = responders.find((x) => x.id === t.responderId)!;
   const thread = messages.filter((m) => m.threadId === t.id);
   const latest = thread[thread.length - 1];
-  const unread = unreadCount(t.id);
+  const unread = useUnread(t.id);
   const cat = categoryMeta[t.category];
   const preview = latest ? `${latest.from === 'resident' ? 'You: ' : ''}${latest.text}` : '';
 

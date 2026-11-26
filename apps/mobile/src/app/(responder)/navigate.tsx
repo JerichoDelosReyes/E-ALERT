@@ -5,7 +5,7 @@ import { ActionSheetIOS, Alert, Platform, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MapCanvas, MeMarker, Route, SymbolMarker } from '@/features/MapCanvas';
-import { useApp } from '@/state/app';
+import { appActions, useAppState, useUnread } from '@/state/app';
 import { Glass, GlassGroup } from '@/ui/Glass';
 import { Icon } from '@/ui/Icon';
 import { Button, GlassIconButton } from '@/ui/primitives';
@@ -17,8 +17,9 @@ const SELF = responders[2];
 
 export default function Navigate() {
   const c = useColors();
-  const { assignment, markArrived, closeAssignment, unreadCount } = useApp();
-  const unread = unreadCount('t-0042');
+  const { markArrived, closeAssignment } = appActions;
+  const assignment = useAppState((s) => s.assignment);
+  const unread = useUnread('t-0042');
 
   if (!assignment) {
     return (

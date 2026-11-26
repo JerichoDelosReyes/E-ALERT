@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { AccessibilityInfo, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useApp } from '@/state/app';
+import { appActions } from '@/state/app';
 import { CountdownRing } from '@/ui/CountdownRing';
 import { Icon, type IconName } from '@/ui/Icon';
 import { Button } from '@/ui/primitives';
@@ -20,7 +20,7 @@ import { useColors } from '@/ui/theme';
 export default function Offer() {
   const c = useColors();
   const insets = useSafeAreaInsets();
-  const { acceptOffer } = useApp();
+  const { acceptOffer } = appActions;
   const inc = pendingOffer;
   const cat = categoryMeta[inc.category];
   const [left, setLeft] = useState<number>(ASSIGNMENT.acceptTimeoutSec);

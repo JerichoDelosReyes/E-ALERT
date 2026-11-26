@@ -35,6 +35,8 @@ export function SOSButton({ onTriggered, idleHint, sendLabel = 'SOS' }: { onTrig
   const reduce = useReducedMotion();
   const [count, setCount] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // True between the 3rd tap and the sheet opening, so extra taps can't send twice.
+  const firing = useRef(false);
 
   const press = useSharedValue(1);
   const halo = useSharedValue(1);
@@ -50,13 +52,15 @@ export function SOSButton({ onTriggered, idleHint, sendLabel = 'SOS' }: { onTrig
   useEffect(() => () => clearTimeout(timer.current), []);
 
   const onTap = () => {
+    if (firing.current) return;
     clearTimeout(timer.current);
     const next = count + 1;
     press.value = withSequence(withTiming(0.94, { duration: 70 }), withSpring(1, { damping: 12, stiffness: 260 }));
     if (next >= TAPS) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       setCount(TAPS);
-      setTimeout(() => { setCount(0); onTriggered(); }, 180);
+      firing.current = true;
+      timer.current = setTimeout(() => { setCount(0); firing.current = false; onTriggered(); }, 180);
       return;
     }
     Haptics.impactAsync(next === 1 ? Haptics.ImpactFeedbackStyle.Medium : Haptics.ImpactFeedbackStyle.Heavy);

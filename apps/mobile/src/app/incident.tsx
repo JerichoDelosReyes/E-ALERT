@@ -8,7 +8,7 @@ import type { Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MapCanvas, MeMarker, PersonMarker, Route, toLatLng } from '@/features/MapCanvas';
-import { useApp } from '@/state/app';
+import { appActions, useAppState, useUnread } from '@/state/app';
 import { Glass, GlassGroup } from '@/ui/Glass';
 import { Icon, type IconName } from '@/ui/Icon';
 import { Avatar, Button, GlassIconButton } from '@/ui/primitives';
@@ -30,21 +30,22 @@ const ROUTE: LatLng[] = [
 export default function ActiveIncident() {
   const c = useColors();
   const insets = useSafeAreaInsets();
-  const { activeIncident, endIncident, unreadCount } = useApp();
+  const { endIncident } = appActions;
+  const activeIncident = useAppState((s) => s.activeIncident);
   const inc = { ...incidents[0], category: activeIncident?.category ?? incidents[0].category };
   const responder = responders.find((r) => r.id === inc.responderId)!;
   const cat = categoryMeta[inc.category];
   const current = STEPS.indexOf(inc.status);
   const arrived = inc.status === 'arrived';
-  const unread = unreadCount(THREAD_ID);
+  const unread = useUnread(THREAD_ID);
 
   const map = useRef<MapView>(null);
-  const region = useRef<Region | null>(null);
+  // Seeded with the initial view so zoom works before the first pan.
+  const region = useRef<Region>({ latitude: 14.4272, longitude: 120.9418, latitudeDelta: 0.016, longitudeDelta: 0.016 });
   const route = [responder.location, ...ROUTE.slice(1)];
 
   const zoom = (factor: number) => {
     const r = region.current;
-    if (!r) return;
     Haptics.selectionAsync();
     map.current?.animateToRegion({ ...r, latitudeDelta: r.latitudeDelta * factor, longitudeDelta: r.longitudeDelta * factor }, 250);
   };

@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EMERGENCY_TYPES, EmergencyTypes } from '@/features/EmergencyTypes';
 import { SOSButton } from '@/features/SOSButton';
-import { useApp } from '@/state/app';
+import { useAppState, useUnread } from '@/state/app';
 import { Icon } from '@/ui/Icon';
 import { Logo } from '@/ui/Logo';
 import { Avatar, Card, CircleButton } from '@/ui/primitives';
@@ -16,8 +16,9 @@ import { useColors } from '@/ui/theme';
 
 export default function Home() {
   const c = useColors();
-  const { activeIncident, messages, unreadCount } = useApp();
-  const unread = unreadCount('t-0042');
+  const activeIncident = useAppState((s) => s.activeIncident);
+  const messages = useAppState((s) => s.messages);
+  const unread = useUnread('t-0042');
   const lastIn = [...messages].reverse().find((m) => m.threadId === 't-0042' && m.from === 'responder');
   const [type, setType] = useState<string | null>(null);
   const picked = EMERGENCY_TYPES.find((t) => t.key === type);

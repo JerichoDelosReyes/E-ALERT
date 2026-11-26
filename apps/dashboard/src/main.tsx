@@ -5,7 +5,6 @@ import { BrowserRouter } from 'react-router';
 
 import App from './App';
 import './styles.css';
-import 'maplibre-gl/dist/maplibre-gl.css';
 
 /** One source of truth: shared palette → CSS variables, light and dark. */
 function injectTokens() {

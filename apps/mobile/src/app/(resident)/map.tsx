@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { MapCanvas, MeMarker, SymbolMarker } from '@/features/MapCanvas';
-import { useApp } from '@/state/app';
+import { useAppState } from '@/state/app';
 import { Glass, GlassGroup } from '@/ui/Glass';
 import { Icon } from '@/ui/Icon';
 import { Button, StatusPill } from '@/ui/primitives';
@@ -29,7 +29,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 export default function MapTab() {
   const c = useColors();
-  const { activeIncident } = useApp();
+  const activeIncident = useAppState((s) => s.activeIncident);
   const [filter, setFilter] = useState<Filter>('all');
   const open = incidents.filter((i) => i.status !== 'resolved' && i.reporterName !== me.name);
   const shown = filter === 'all' ? open : filter === 'evac' ? [] : open.filter((i) => i.category === filter);

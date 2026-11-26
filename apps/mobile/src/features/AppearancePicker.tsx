@@ -2,13 +2,14 @@ import { space } from '@e-alert/shared';
 import * as Haptics from 'expo-haptics';
 import { Pressable, View } from 'react-native';
 
-import { useApp, type AppearancePref } from '@/state/app';
+import { appActions, type AppearancePref, useAppState } from '@/state/app';
 import { Text } from '@/ui/Text';
 import { useColors } from '@/ui/theme';
 
 export function AppearancePicker() {
   const c = useColors();
-  const { appearance, setAppearance } = useApp();
+  const { setAppearance } = appActions;
+  const appearance = useAppState((s) => s.appearance);
   const opts: { k: AppearancePref; label: string }[] = [
     { k: 'system', label: 'Automatic' },
     { k: 'light', label: 'Light' },

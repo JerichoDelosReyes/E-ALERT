@@ -1,9 +1,10 @@
 import { Redirect } from 'expo-router';
 
-import { useApp } from '@/state/app';
+import { useAppState } from '@/state/app';
 
 export default function Entry() {
-  const { onboarded, role } = useApp();
+  const onboarded = useAppState((s) => s.onboarded);
+  const role = useAppState((s) => s.role);
   if (!onboarded) return <Redirect href="/onboarding" />;
   return <Redirect href={role === 'responder' ? '/duty' : '/home'} />;
 }

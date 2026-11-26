@@ -2,13 +2,17 @@ import { incidents, verificationQueue } from '@e-alert/shared';
 import { BarChart3, FlaskConical, Inbox, Map, Megaphone, ShieldCheck, Users } from 'lucide-react';
 import { NavLink, Route, Routes, useLocation } from 'react-router';
 
-import { Analytics } from './pages/Analytics';
-import { Broadcasts } from './pages/Broadcasts';
-import { Drill } from './pages/Drill';
-import { Incidents } from './pages/Incidents';
-import { LiveMap } from './pages/LiveMap';
-import { Responders } from './pages/Responders';
-import { Verification } from './pages/Verification';
+import { lazy, Suspense } from 'react';
+
+// Each page loads on demand: the map stack (MapLibre + deck.gl) only on Live Map,
+// the chart library only on Analytics.
+const LiveMap = lazy(() => import('./pages/LiveMap').then((m) => ({ default: m.LiveMap })));
+const Incidents = lazy(() => import('./pages/Incidents').then((m) => ({ default: m.Incidents })));
+const Responders = lazy(() => import('./pages/Responders').then((m) => ({ default: m.Responders })));
+const Verification = lazy(() => import('./pages/Verification').then((m) => ({ default: m.Verification })));
+const Broadcasts = lazy(() => import('./pages/Broadcasts').then((m) => ({ default: m.Broadcasts })));
+const Analytics = lazy(() => import('./pages/Analytics').then((m) => ({ default: m.Analytics })));
+const Drill = lazy(() => import('./pages/Drill').then((m) => ({ default: m.Drill })));
 import { Avatar, Logo } from './ui';
 
 const open = incidents.filter((i) => i.status !== 'resolved').length;
@@ -61,6 +65,7 @@ export default function App() {
       </nav>
 
       <main className={`main${bleed ? ' bleed' : ''}`}>
+        <Suspense fallback={<div className="page muted" role="status">Loading…</div>}>
         <Routes>
           <Route path="/" element={<LiveMap />} />
           <Route path="/incidents" element={<Incidents />} />
@@ -70,6 +75,7 @@ export default function App() {
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/drill" element={<Drill />} />
         </Routes>
+        </Suspense>
       </main>
     </div>
   );

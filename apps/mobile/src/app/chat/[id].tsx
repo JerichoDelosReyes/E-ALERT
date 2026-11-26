@@ -6,7 +6,7 @@ import { FlatList, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollVie
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ChatBubble } from '@/features/ChatBubble';
-import { useApp } from '@/state/app';
+import { appActions, useAppState } from '@/state/app';
 import { Glass } from '@/ui/Glass';
 import { Icon } from '@/ui/Icon';
 import { Avatar, Chip, GlassIconButton } from '@/ui/primitives';
@@ -18,12 +18,15 @@ const HEADER_H = 64;
 export default function Thread() {
   const c = useColors();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { role, messages, sendMessage, markRead } = useApp();
+  const { sendMessage, markRead } = appActions;
+  const role = useAppState((s) => s.role);
+  const messages = useAppState((s) => s.messages);
   const [draft, setDraft] = useState('');
 
   const thread = chatThreads.find((t) => t.id === id);
   const responder = responders.find((r) => r.id === thread?.responderId);
   const list = useMemo(() => messages.filter((m) => m.threadId === id), [messages, id]);
+  const reversed = useMemo(() => [...list].reverse(), [list]);
 
   // Opening the thread reads everything in it, including replies that arrive while open.
   useEffect(() => { if (id) markRead(id); }, [id, list.length, markRead]);
@@ -48,7 +51,6 @@ export default function Thread() {
     setDraft('');
   };
 
-  const reversed = [...list].reverse();
   const canSend = draft.trim().length > 0 && thread.active;
 
   return (
@@ -57,6 +59,9 @@ export default function Thread() {
         <SafeAreaView edges={['top']} style={{ flex: 1 }}>
           <FlatList
             inverted
+            initialNumToRender={20}
+            maxToRenderPerBatch={10}
+            windowSize={11}
             data={reversed}
             keyExtractor={(m) => m.id}
             contentContainerStyle={{ paddingHorizontal: space.lg, paddingTop: space.md, paddingBottom: HEADER_H + space.lg }}

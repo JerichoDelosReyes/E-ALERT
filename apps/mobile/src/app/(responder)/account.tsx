@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { View } from 'react-native';
 
 import { AppearancePicker } from '@/features/AppearancePicker';
-import { useApp } from '@/state/app';
+import { appActions } from '@/state/app';
 import { Icon } from '@/ui/Icon';
 import { Avatar, Card, Grouped, IconTile, LargeTitleScreen, ListRow } from '@/ui/primitives';
 import { Text } from '@/ui/Text';
@@ -13,7 +13,7 @@ const SELF = responders[2];
 
 export default function Account() {
   const c = useColors();
-  const { setRole } = useApp();
+  const { setRole } = appActions;
   return (
     <LargeTitleScreen title="Account">
       <Card style={{ flexDirection: 'row', alignItems: 'center', gap: space.lg, marginBottom: space.xxl, borderRadius: radius.lg }}>

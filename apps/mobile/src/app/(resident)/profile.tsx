@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Switch, View } from 'react-native';
 
 import { AppearancePicker } from '@/features/AppearancePicker';
-import { useApp } from '@/state/app';
+import { appActions } from '@/state/app';
 import { Icon } from '@/ui/Icon';
 import { Avatar, Card, Grouped, IconTile, LargeTitleScreen, ListRow } from '@/ui/primitives';
 import { Text } from '@/ui/Text';
@@ -12,7 +12,7 @@ import { useColors } from '@/ui/theme';
 
 export default function Profile() {
   const c = useColors();
-  const { setRole } = useApp();
+  const { setRole } = appActions;
   const [audio, setAudio] = useState(true);
   const [medical, setMedical] = useState(me.medical.shareWithResponder);
 

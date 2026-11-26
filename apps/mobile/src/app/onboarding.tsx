@@ -6,7 +6,7 @@ import { Platform, StyleSheet, View } from 'react-native';
 import Animated, { FadeInRight, FadeOutLeft, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useApp } from '@/state/app';
+import { appActions } from '@/state/app';
 import { Icon, type IconName } from '@/ui/Icon';
 import { Logo } from '@/ui/Logo';
 import { Button } from '@/ui/primitives';
@@ -24,7 +24,7 @@ export default function Onboarding() {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
-  const { finishOnboarding, setRole } = useApp();
+  const { finishOnboarding, setRole } = appActions;
   const [step, setStep] = useState(0);
 
   const finish = (role: 'resident' | 'responder') => {

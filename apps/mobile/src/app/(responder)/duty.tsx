@@ -3,7 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { useApp } from '@/state/app';
+import { appActions, useAppState } from '@/state/app';
 import { Icon } from '@/ui/Icon';
 import { Avatar, Button, Card, LargeTitleScreen } from '@/ui/primitives';
 import { Text } from '@/ui/Text';
@@ -20,7 +20,9 @@ const HELP: Record<Availability, string> = {
 
 export default function Duty() {
   const c = useColors();
-  const { availability, setAvailability, assignment } = useApp();
+  const { setAvailability } = appActions;
+  const availability = useAppState((s) => s.availability);
+  const assignment = useAppState((s) => s.assignment);
   const r = ME_RESPONDER;
 
   return (
