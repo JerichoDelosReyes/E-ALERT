@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+build/
+ios/
+android/
+*.log
+.DS_Store
+.env*
+!.env.example
+web-build/
+.claude/settings.local.json

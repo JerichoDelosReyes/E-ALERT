@@ -1,0 +1,136 @@
+/* Color tokens (--bg, --label, …) are injected from @e-alert/shared in main.tsx. */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--label);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--action) 55%, transparent); outline-offset: 2px; border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ── Glass (functional layer only: sidebar, toolbars, floating map panels) ── */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 0.5px solid var(--glassEdge);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 12px 40px var(--shadow), inset 0 1px 0 var(--glassHighlight);
+}
+
+/* ── Shell ── */
+.shell { position: relative; height: 100%; display: flex; }
+.sidebar {
+  position: fixed; z-index: 20; top: 10px; left: 10px; bottom: 10px; width: 240px;
+  border-radius: 22px; padding: 14px 10px; display: flex; flex-direction: column; gap: 2px;
+}
+.brand { display: flex; align-items: center; gap: 10px; padding: 6px 10px 16px; }
+.brand-mark { width: 30px; height: 30px; border-radius: 9px; background: var(--brand); display: grid; place-items: center; color: #fff; }
+.brand b { font-size: 15px; letter-spacing: -0.2px; }
+.brand span { display: block; font-size: 12px; color: var(--secondaryLabel); }
+.nav-group { font-size: 11px; font-weight: 600; color: var(--tertiaryLabel); padding: 14px 10px 4px; }
+.nav-link {
+  display: flex; align-items: center; gap: 10px; padding: 0 10px; height: 34px; border-radius: 10px;
+  color: var(--label); text-decoration: none; font-weight: 500;
+}
+.nav-link svg { color: var(--brand); }
+.nav-link:hover { background: var(--fill); }
+.nav-link.active { background: var(--fillStrong); }
+.nav-link .count { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--secondaryLabel); }
+.nav-link .count.alert { color: #fff; background: var(--critical); border-radius: 10px; padding: 0 7px; line-height: 18px; }
+.sidebar-foot { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 10px; border-top: 0.5px solid var(--separator); }
+
+.main { flex: 1; margin-left: 260px; min-width: 0; }
+.main.bleed { margin-left: 0; }
+.page { padding: 28px 32px 48px; max-width: 1280px; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.page-head h1 { font-size: 28px; line-height: 34px; letter-spacing: -0.5px; margin: 0; }
+.page-head p { margin: 2px 0 0; color: var(--secondaryLabel); }
+
+/* ── Content layer: solid surfaces ── */
+.card { background: var(--surface); border-radius: 18px; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 6px 20px var(--shadow); }
+.card-pad { padding: 18px 20px; }
+.card h2 { font-size: 15px; margin: 0 0 2px; letter-spacing: -0.2px; }
+.card .sub { color: var(--secondaryLabel); font-size: 12px; margin: 0 0 14px; }
+.grid { display: grid; gap: 16px; }
+.muted { color: var(--secondaryLabel); }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* ── Controls ── */
+.btn {
+  height: 32px; padding: 0 14px; border-radius: 999px; border: 0; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 6px; background: var(--fill); color: var(--label);
+}
+.btn:hover { background: var(--fillStrong); }
+.btn.primary { background: var(--action); color: #fff; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { color: var(--critical); }
+.btn.safe { background: var(--safe); color: #fff; }
+.seg { display: inline-flex; padding: 2px; border-radius: 10px; background: var(--fill); }
+.seg button { border: 0; background: transparent; height: 28px; padding: 0 12px; border-radius: 8px; font-weight: 500; }
+.seg button[aria-pressed='true'] { background: var(--surfaceRaised); box-shadow: 0 1px 4px rgba(0,0,0,0.12); font-weight: 600; }
+.field { width: 100%; height: 36px; border-radius: 10px; border: 0; background: var(--fill); padding: 0 12px; }
+textarea.field { height: auto; padding: 10px 12px; resize: vertical; }
+label.lbl { display: block; font-size: 12px; font-weight: 600; color: var(--secondaryLabel); margin: 0 0 6px; }
+
+.pill { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px; border-radius: 999px; background: var(--fill); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.pill svg { flex: none; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 11px; font-weight: 700; flex: none; }
+
+/* ── Table ── */
+table.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { text-align: left; font-size: 12px; font-weight: 600; color: var(--secondaryLabel); padding: 10px 16px; border-bottom: 0.5px solid var(--separator); }
+.tbl td { padding: 12px 16px; border-bottom: 0.5px solid var(--separator); vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl tbody tr { cursor: pointer; }
+.tbl tbody tr:hover td { background: var(--fill); }
+.tbl tr[aria-selected='true'] td { background: color-mix(in srgb, var(--action) 10%, transparent); }
+
+/* ── Live map ── */
+.map-wrap { position: fixed; inset: 0; }
+.float { position: absolute; z-index: 10; border-radius: 20px; }
+.map-toolbar { top: 10px; left: 260px; right: 10px; height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 10px 0 16px; border-radius: 18px; }
+.map-toolbar h1 { font-size: 15px; margin: 0; letter-spacing: -0.2px; }
+.incident-list { top: 72px; right: 10px; width: 340px; max-height: calc(100% - 82px); overflow: auto; padding: 8px; }
+.inc-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px; border-radius: 14px; width: 100%; text-align: left; border: 0; background: transparent; }
+.inc-row:hover { background: var(--fill); }
+.inc-row[aria-pressed='true'] { background: var(--fillStrong); }
+.cat-dot { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: #fff; flex: none; }
+.stats { left: 260px; bottom: 10px; display: flex; gap: 4px; padding: 6px; border-radius: 18px; }
+.stat { padding: 6px 14px; }
+.stat b { display: block; font-size: 20px; letter-spacing: -0.4px; }
+.stat span { font-size: 12px; color: var(--secondaryLabel); }
+.marker { width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid #fff; display: grid; place-items: center; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.25); cursor: pointer; padding: 0; }
+.marker.sel { width: 40px; height: 40px; }
+.r-marker { display: block; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+.maplibregl-ctrl-attrib { font-size: 10px; }
+
+/* ── Detail drawer (incident) ── */
+.detail h3 { margin: 0; font-size: 17px; letter-spacing: -0.3px; }
+.timeline { list-style: none; margin: 12px 0 0; padding: 0; }
+.timeline li { display: grid; grid-template-columns: 14px 1fr; gap: 10px; padding-bottom: 12px; position: relative; }
+.timeline li::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--dot, var(--action)); margin-top: 4px; }
+.timeline li:not(:last-child)::after { content: ''; position: absolute; left: 4px; top: 16px; bottom: 0; width: 2px; background: var(--fill); }
+
+/* ── Charts ── */
+.tooltip { background: var(--surfaceRaised); border-radius: 10px; padding: 8px 10px; box-shadow: 0 8px 24px var(--shadow); font-size: 12px; border: 0.5px solid var(--separator); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--secondaryLabel); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.kpi b { display: block; font-size: 30px; line-height: 36px; letter-spacing: -0.6px; }
+.kpi span { color: var(--secondaryLabel); font-size: 13px; }
+.kpi em { font-style: normal; font-size: 12px; font-weight: 600; }
+
+@media (max-width: 900px) {
+  .sidebar { position: static; width: auto; margin: 10px; }
+  .shell { flex-direction: column; height: auto; }
+  .main { margin-left: 0; }
+  .page { padding: 16px; }
+  .map-toolbar, .stats { left: 10px; }
+  .incident-list { width: auto; left: 10px; top: auto; bottom: 90px; max-height: 40%; }
+}
