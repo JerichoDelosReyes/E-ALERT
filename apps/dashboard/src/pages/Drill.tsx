@@ -19,7 +19,7 @@ export function Drill() {
         <span>Drill data is kept apart from live incidents and is the only data used for the thesis measurements.</span>
       </div>
 
-      <div className="grid" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
+      <div className="grid grid-halves">
         <form className="card card-pad" onSubmit={(e) => { e.preventDefault(); setRan(true); }}>
           <h2>Scenario</h2>
           <p className="sub">Compare greedy nearest-neighbor with optimal batch assignment.</p>

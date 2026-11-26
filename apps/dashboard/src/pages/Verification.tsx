@@ -38,7 +38,7 @@ export function Verification() {
           <p className="muted">New sign-ups and credentials will show up here.</p>
         </div>
       ) : (
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+        <div className="grid grid-cards">
           {pending.map((v) => (
             <article key={v.id} className="card card-pad">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>

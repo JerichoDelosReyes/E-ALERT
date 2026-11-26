@@ -71,7 +71,8 @@ export function CatLabel({ cat }: { cat: Category }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
       <CatBadge cat={cat} size={24} />
-      {categoryMeta[cat].label}
+      {/* On small phones only the icon shows; the name stays for screen readers. */}
+      <span className="cat-name">{categoryMeta[cat].label}</span>
     </span>
   );
 }
@@ -88,7 +89,7 @@ export function PriorityBar({ value }: { value: number }) {
   const label = value >= 85 ? 'Critical' : value >= 65 ? 'High' : 'Normal';
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }} aria-label={`Priority ${value}, ${label}`}>
-      <span style={{ width: 48, height: 6, borderRadius: 3, background: p.fill, overflow: 'hidden' }}>
+      <span className="prio-bar" style={{ height: 6, borderRadius: 3, background: p.fill, overflow: 'hidden' }}>
         <span style={{ display: 'block', width: `${value}%`, height: '100%', background: tone, borderRadius: 3 }} />
       </span>
       <span className="tnum" style={{ fontWeight: 600 }}>{value}</span>

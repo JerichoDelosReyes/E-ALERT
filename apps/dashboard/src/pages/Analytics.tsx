@@ -49,7 +49,7 @@ export function Analytics() {
         </div>
       </PageHead>
 
-      <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: 16 }}>
+      <div className="grid grid-kpi" style={{ marginBottom: 16 }}>
         {[
           { v: data.length.toLocaleString(), l: 'Incidents' },
           { v: '3:48', l: 'Median time to assign' },
@@ -60,7 +60,7 @@ export function Analytics() {
         ))}
       </div>
 
-      <div className="grid" style={{ gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', marginBottom: 16 }}>
+      <div className="grid grid-main-side" style={{ marginBottom: 16 }}>
         <section className="card card-pad">
           <h2>Incidents by hour</h2>
           <p className="sub">Busiest around {hourLabel(peak.h)}. Stage responders before then.</p>
@@ -87,7 +87,7 @@ export function Analytics() {
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={byCat} margin={{ top: 8, right: 0, left: -18, bottom: 0 }} barCategoryGap="28%">
               {grid}
-              <XAxis dataKey="label" {...axis} />
+              <XAxis dataKey="label" {...axis} interval={0} tick={{ fill: p.secondaryLabel, fontSize: 11 }} />
               <YAxis {...axis} allowDecimals={false} />
               <Tooltip content={<Tip unit="incidents" />} cursor={{ fill: p.fill }} />
               <Bar isAnimationActive={false} dataKey="n" radius={[4, 4, 0, 0]}>
@@ -104,7 +104,7 @@ export function Analytics() {
         <ResponsiveContainer width="100%" height={byBrgy.length * 44 + 20}>
           <BarChart data={byBrgy} layout="vertical" margin={{ top: 0, right: 24, left: 20, bottom: 0 }} barCategoryGap="30%">
             <XAxis type="number" hide />
-            <YAxis type="category" dataKey="b" {...axis} width={120} />
+            <YAxis type="category" dataKey="b" {...axis} width={112} />
             <Tooltip content={<Tip unit="incidents" />} cursor={{ fill: p.fill }} />
             <Bar isAnimationActive={false} dataKey="n" fill={p.brand} radius={[0, 4, 4, 0]} label={{ position: 'right', fill: p.secondaryLabel, fontSize: 12 }} />
           </BarChart>

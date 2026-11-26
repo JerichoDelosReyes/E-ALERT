@@ -15,7 +15,7 @@ export function Broadcasts() {
   return (
     <div className="page">
       <PageHead title="Broadcasts" sub="Send a warning to everyone inside an area and ask them to check in." />
-      <div className="grid" style={{ gridTemplateColumns: 'minmax(0, 3fr) minmax(0, 2fr)' }}>
+      <div className="grid grid-main-side">
         <form className="card card-pad" onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
           <h2>New broadcast</h2>
           <p className="sub">Residents get a push alert with a Safe / Need help check-in.</p>

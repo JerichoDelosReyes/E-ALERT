@@ -23,6 +23,20 @@ function DeckOverlay(props: MapboxOverlayProps) {
 
 const points = historicalPoints(500);
 
+/** Keep incidents in the part of the map not covered by floating panels. */
+function initialView() {
+  const phone = window.matchMedia('(max-width: 899px)').matches;
+  const tablet = !phone && window.matchMedia('(max-width: 1199px)').matches;
+  return {
+    longitude: IMUS_CENTER.lng,
+    latitude: IMUS_CENTER.lat - 0.006,
+    zoom: phone ? 12.4 : 13.2,
+    padding: phone
+      ? { top: 130, bottom: Math.round(window.innerHeight * 0.46), left: 10, right: 10 }
+      : { top: 70, bottom: 80, left: tablet ? 90 : 260, right: tablet ? 340 : 360 },
+  };
+}
+
 export function LiveMap() {
   const dark = useDark();
   const p = usePalette();
@@ -49,7 +63,7 @@ export function LiveMap() {
   return (
     <div className="map-wrap">
       <MapGL
-        initialViewState={{ longitude: IMUS_CENTER.lng - 0.012, latitude: IMUS_CENTER.lat - 0.004, zoom: 13.4 }}
+        initialViewState={initialView()}
         mapStyle={dark ? STYLE.dark : STYLE.light}
         style={{ position: 'absolute', inset: 0 }}
         attributionControl={{ compact: true }}>
