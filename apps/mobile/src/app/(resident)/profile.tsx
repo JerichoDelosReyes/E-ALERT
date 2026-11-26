@@ -5,6 +5,7 @@ import { Switch, View } from 'react-native';
 
 import { AppearancePicker } from '@/features/AppearancePicker';
 import { appActions } from '@/state/app';
+import { authActions, initialsOf, useAuth } from '@/state/auth';
 import { Icon } from '@/ui/Icon';
 import { Avatar, Card, Grouped, IconTile, LargeTitleScreen, ListRow } from '@/ui/primitives';
 import { Text } from '@/ui/Text';
@@ -13,15 +14,17 @@ import { useColors } from '@/ui/theme';
 export default function Profile() {
   const c = useColors();
   const { setRole } = appActions;
+  const session = useAuth((s) => s.session);
   const [audio, setAudio] = useState(true);
   const [medical, setMedical] = useState(me.medical.shareWithResponder);
 
   return (
     <LargeTitleScreen title="Profile">
       <Card style={{ flexDirection: 'row', alignItems: 'center', gap: space.lg, marginBottom: space.xxl, borderRadius: radius.lg }}>
-        <Avatar initials={me.initials} size={64} />
+        <Avatar initials={initialsOf(session?.name ?? '')} size={64} />
         <View style={{ flex: 1 }}>
-          <Text variant="title3">{me.name}</Text>
+          <Text variant="title3">{session?.name}</Text>
+          <Text variant="footnote" color="secondaryLabel">{session?.email}</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
             <Icon name="shield" size={14} color={c.safe} />
             <Text variant="footnote" color="secondaryLabel">Identity verified · {me.barangay}</Text>
@@ -65,6 +68,15 @@ export default function Profile() {
           title="Switch to responder view"
           leading={<IconTile name="swap" bg={c.info} />}
           onPress={() => { setRole('responder'); router.replace('/duty'); }}
+          last
+        />
+      </Grouped>
+
+      <Grouped>
+        <ListRow
+          title="Log out"
+          leading={<IconTile name="logout" bg={c.critical} />}
+          onPress={async () => { await authActions.logOut(); router.replace('/login'); }}
           last
         />
       </Grouped>

@@ -54,6 +54,11 @@ export const ICONS = {
   car: ['car.fill', 'car'],
   verified: ['checkmark.seal.fill', 'checkmark-circle'],
   xmark: ['xmark.circle.fill', 'close-circle'],
+  at: ['at', 'at'],
+  eyeOff: ['eye.slash.fill', 'eye-off'],
+  person: ['person.fill', 'person'],
+  logout: ['rectangle.portrait.and.arrow.right', 'log-out-outline'],
+  apple: ['apple.logo', 'logo-apple'],
   // Categories & statuses come from shared tokens (sf/ion pairs).
 } as const satisfies Record<string, readonly [string, Ion]>;
 

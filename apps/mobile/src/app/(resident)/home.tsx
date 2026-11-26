@@ -7,9 +7,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EMERGENCY_TYPES, EmergencyTypes } from '@/features/EmergencyTypes';
 import { SOSButton } from '@/features/SOSButton';
 import { useAppState, useUnread } from '@/state/app';
+import { initialsOf, useAuth } from '@/state/auth';
 import { Icon } from '@/ui/Icon';
 import { Logo } from '@/ui/Logo';
-import { Avatar, Card, CircleButton } from '@/ui/primitives';
+import { Avatar, Button, Card, CircleButton } from '@/ui/primitives';
 import { TAB_BAR_CLEARANCE } from '@/ui/tabs';
 import { Text } from '@/ui/Text';
 import { useColors } from '@/ui/theme';
@@ -21,12 +22,23 @@ export default function Home() {
   const unread = useUnread('t-0042');
   const lastIn = [...messages].reverse().find((m) => m.threadId === 't-0042' && m.from === 'responder');
   const [type, setType] = useState<string | null>(null);
+  const userName = useAuth((s) => s.session?.name ?? '');
   const picked = EMERGENCY_TYPES.find((t) => t.key === type);
+  // Only scroll when the content really overflows (small phones, large text sizes).
+  // Without this, flexGrow makes content ≈ viewport and iOS lets it drag by a sub-pixel overflow.
+  const [viewH, setViewH] = useState(0);
+  const [contentH, setContentH] = useState(0);
+  const overflows = contentH > viewH + 1;
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: c.bg }}>
     <ScrollView
       contentInsetAdjustmentBehavior="never"
+      alwaysBounceVertical={false}
+      bounces={overflows}
+      scrollEnabled={overflows}
+      onLayout={(e) => setViewH(e.nativeEvent.layout.height)}
+      onContentSizeChange={(_, h) => setContentH(h)}
       style={{ backgroundColor: c.bg }}
       contentContainerStyle={{ flexGrow: 1, paddingBottom: TAB_BAR_CLEARANCE }}
       showsVerticalScrollIndicator={false}>
@@ -45,58 +57,89 @@ export default function Home() {
       {/* Greeting */}
       <View style={[styles.pad, styles.greet]}>
         <View style={{ flex: 1 }}>
-          <Text variant="largeTitle">Hi, {me.firstName}!</Text>
+          <Text variant="largeTitle">{activeIncident ? 'Stay calm' : 'Need help?'}</Text>
           <View style={styles.verified}>
             <Icon name="shield" size={14} color={c.safe} />
             <Text variant="footnote" color="secondaryLabel">Verified · {me.barangay}</Text>
           </View>
         </View>
         <Pressable onPress={() => router.navigate('/profile')} accessibilityRole="button" accessibilityLabel="Your profile">
-          <Avatar initials={me.initials} size={48} />
+          <Avatar initials={initialsOf(userName)} size={48} />
         </Pressable>
       </View>
 
-      {/* Active incident banner */}
       {activeIncident ? (
-        <Pressable
-          onPress={() => router.push('/incident')}
-          accessibilityRole="button"
-          accessibilityLabel={`${categoryMeta[activeIncident.category].label} alert active. Help is on the way. Open details.`}
-          style={[styles.pad, { marginBottom: space.lg }]}>
-          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: c.brandSoft }}>
-            <View style={[styles.liveDot, { backgroundColor: c.critical }]} />
-            <View style={{ flex: 1 }}>
-              <Text variant="headline">Help is on the way</Text>
-              <Text variant="footnote" color={unread ? 'label' : 'secondaryLabel'} weight={unread ? '600' : '400'} numberOfLines={1}>
-                {unread && lastIn ? `Nurse Joy: ${lastIn.text}` : 'Nurse Joy Aquino · about 3 min'}
-              </Text>
-            </View>
-            <Icon name="chevron" size={14} color={c.secondaryLabel} />
-          </Card>
-        </Pressable>
-      ) : null}
+        /* Alert open: help is already coming, so SOS and category buttons are hidden.
+           A repeat SOS would only be merged into this incident; 911 stays in the top bar. */
+        <View style={[styles.pad, styles.activeArea]}>
+          <Pressable
+            onPress={() => router.push('/incident')}
+            accessibilityRole="button"
+            accessibilityLabel={`${categoryMeta[activeIncident.category].label} alert active. Help is on the way. Nurse Joy Aquino, about 3 minutes away. Open details.`}>
+            <Card style={[styles.activeCard, { backgroundColor: c.brandSoft }]}>
+              <View style={styles.activeHead}>
+                <View style={[styles.liveDot, { backgroundColor: c.critical }]} />
+                <Text variant="subhead" weight="600" color="secondaryLabel">
+                  Live · {categoryMeta[activeIncident.category].label} alert
+                </Text>
+              </View>
+              <Text variant="title1" weight="700">Help is on the way</Text>
+              <View style={styles.activeResponder}>
+                <Avatar initials="JA" size={44} />
+                <View style={{ flex: 1 }}>
+                  <Text variant="headline">Nurse Joy Aquino</Text>
+                  <Text variant="footnote" color="secondaryLabel">Medical · about 3 min away</Text>
+                </View>
+                <Icon name="chevron" size={14} color={c.secondaryLabel} />
+              </View>
+              {unread && lastIn ? (
+                <Text variant="footnote" weight="600" numberOfLines={2}>Nurse Joy: {lastIn.text}</Text>
+              ) : null}
+            </Card>
+          </Pressable>
 
-      {/* Emergency type (optional pre-pick) */}
-      <EmergencyTypes selected={type} onSelect={setType} />
+          <View style={{ flexDirection: 'row', gap: space.sm }}>
+            <Button label="Track" icon="location" tone="action" size="medium" style={{ flex: 1 }} onPress={() => router.push('/incident')} />
+            <Button
+              label={unread ? `Message · ${unread}` : 'Message'}
+              icon="message"
+              variant="tinted"
+              tone="action"
+              size="medium"
+              style={{ flex: 1 }}
+              onPress={() => router.push('/chat/t-0042')}
+            />
+          </View>
 
-      {/* SOS */}
-      <View style={styles.sosArea}>
-        <SOSButton
-          sendLabel={picked ? `${picked.label} SOS` : 'SOS'}
-          idleHint={picked ? `Tap ${ASSIGNMENT.sosTaps} times to send ${picked.label} alert` : undefined}
-          onTriggered={() => {
-            router.push(picked ? { pathname: '/sos', params: { type: picked.key } } : '/sos');
-            setType(null);
-          }}
-        />
-      </View>
+          <Text variant="footnote" color="secondaryLabel" align="center" style={{ marginTop: space.lg }}>
+            SOS is paused while your alert is open.{'\n'}For a different emergency, call 911.
+          </Text>
+        </View>
+      ) : (
+        <>
+          {/* Emergency type (optional pre-pick) */}
+          <EmergencyTypes selected={type} onSelect={setType} />
 
-      {/* Who gets it */}
-      <View style={[styles.pad, styles.who]}>
-        <Text variant="subhead" color="secondaryLabel" align="center">
-          Your SOS goes to the nearest verified responder{'\n'}and your {contacts.length} contacts, with your location.
-        </Text>
-      </View>
+          {/* SOS */}
+          <View style={styles.sosArea}>
+            <SOSButton
+              sendLabel={picked ? `${picked.label} SOS` : 'SOS'}
+              idleHint={picked ? `Tap ${ASSIGNMENT.sosTaps} times to send ${picked.label} alert` : undefined}
+              onTriggered={() => {
+                router.push(picked ? { pathname: '/sos', params: { type: picked.key } } : '/sos');
+                setType(null);
+              }}
+            />
+          </View>
+
+          {/* Who gets it */}
+          <View style={[styles.pad, styles.who]}>
+            <Text variant="subhead" color="secondaryLabel" align="center">
+              Your SOS goes to the nearest verified responder{'\n'}and your {contacts.length} contacts, with your location.
+            </Text>
+          </View>
+        </>
+      )}
     </ScrollView>
     </SafeAreaView>
   );
@@ -132,5 +175,9 @@ const styles = StyleSheet.create({
   verified: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
   liveDot: { width: 10, height: 10, borderRadius: 5 },
   who: { alignItems: 'center', gap: space.sm, marginBottom: space.lg },
+  activeArea: { flex: 1, gap: space.md, marginBottom: space.lg },
+  activeCard: { gap: space.sm, padding: space.lg },
+  activeHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  activeResponder: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginTop: space.xs },
   sosArea: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: space.lg },
 });

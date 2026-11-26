@@ -69,6 +69,8 @@ export function useUnread(threadId?: string): number {
 let replyTimer: ReturnType<typeof setTimeout> | undefined;
 
 export const appActions = {
+  /** Clears per-user state on log in / log out. */
+  resetSession: () => set((p) => ({ ...p, activeIncident: null, lastEndReason: null, assignment: null, availability: 'available' })),
   finishOnboarding: () => set((p) => (p.onboarded ? p : { ...p, onboarded: true })),
   setRole: (role: AppState['role']) => set((p) => (p.role === role ? p : { ...p, role })),
   setAvailability: (availability: Availability) => set((p) => (p.availability === availability ? p : { ...p, availability })),

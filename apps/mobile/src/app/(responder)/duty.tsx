@@ -26,7 +26,16 @@ export default function Duty() {
   const r = ME_RESPONDER;
 
   return (
-    <LargeTitleScreen title="Duty" trailing={<Avatar initials={r.initials} size={40} />}>
+    <LargeTitleScreen title="Duty" trailing={
+        <Pressable
+          onPress={() => router.navigate('/account')}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Your account"
+          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+          <Avatar initials={r.initials} size={40} />
+        </Pressable>
+      }>
       <View style={styles.badges}>
         <View style={[styles.badge, { backgroundColor: c.fill }]}>
           <Icon name="shield" size={14} color={c.safe} />

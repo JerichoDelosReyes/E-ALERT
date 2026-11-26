@@ -4,6 +4,7 @@ import { View } from 'react-native';
 
 import { AppearancePicker } from '@/features/AppearancePicker';
 import { appActions } from '@/state/app';
+import { authActions } from '@/state/auth';
 import { Icon } from '@/ui/Icon';
 import { Avatar, Card, Grouped, IconTile, LargeTitleScreen, ListRow } from '@/ui/primitives';
 import { Text } from '@/ui/Text';
@@ -38,6 +39,11 @@ export default function Account() {
       <Grouped title="Demo" footer="Phase 1 preview. Real roles come from your verified account.">
         <ListRow title="Switch to resident view" leading={<IconTile name="swap" bg={c.info} />}
           onPress={() => { setRole('resident'); router.replace('/home'); }} last />
+      </Grouped>
+
+      <Grouped>
+        <ListRow title="Log out" leading={<IconTile name="logout" bg={c.critical} />}
+          onPress={async () => { await authActions.logOut(); router.replace('/login'); }} last />
       </Grouped>
     </LargeTitleScreen>
   );

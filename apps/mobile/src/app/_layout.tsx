@@ -35,6 +35,7 @@ function Navigator() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+        <Stack.Screen name="login" options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="(resident)" options={{ animation: 'fade' }} />
         <Stack.Screen name="(responder)" options={{ animation: 'fade' }} />
         <Stack.Screen

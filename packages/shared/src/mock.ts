@@ -19,8 +19,8 @@ const minutesAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString(
 
 export const me = {
   id: 'u-001',
-  firstName: 'Jericho',
-  name: 'Jericho Delos Reyes',
+  firstName: 'Juan',
+  name: 'Juan Dela Cruz',
   initials: 'JD',
   barangay: 'Bayan Luma IV',
   location: { lat: 14.4285, lng: 120.9392 } as LatLng,
@@ -35,7 +35,7 @@ export const me = {
 };
 
 export const contacts: Person[] = [
-  { id: 'c1', name: 'Maria Delos Reyes', initials: 'MD', phone: '+63 917 555 0142', relation: 'Mother' },
+  { id: 'c1', name: 'Maria Dela Cruz', initials: 'MD', phone: '+63 917 555 0142', relation: 'Mother' },
   { id: 'c2', name: 'Paolo Santos', initials: 'PS', phone: '+63 928 555 0187', relation: 'Brother' },
   { id: 'c3', name: 'Andrea Cruz', initials: 'AC', phone: '+63 915 555 0133', relation: 'Partner' },
   { id: 'c4', name: 'Kap. Ramon Villanueva', initials: 'RV', phone: '+63 46 555 0110', relation: 'Barangay Captain' },
@@ -60,7 +60,7 @@ export const incidents: Incident[] = [
     location: { lat: 14.4285, lng: 120.9392 },
     barangay: 'Bayan Luma IV',
     landmark: 'Beside Imus Cathedral, blue gate',
-    reporterName: 'Jericho Delos Reyes',
+    reporterName: 'Juan Dela Cruz',
     reportCount: 1,
     confirmations: 2,
     priority: 72,
@@ -218,8 +218,8 @@ export function historicalPoints(count = 400, seed = 7): (LatLng & { category: I
 /* ───────── Chat (thesis Scope 3: in-app chat with the assigned responder) ───────── */
 
 export const chatThreads: ChatThread[] = [
-  { id: 't-0042', incidentId: 'INC-2611-0042', residentName: 'Jericho Delos Reyes', residentInitials: 'JD', responderId: 'r3', category: 'medical', active: true },
-  { id: 't-0038', incidentId: 'INC-2611-0038', residentName: 'Jericho Delos Reyes', residentInitials: 'JD', responderId: 'r8', category: 'medical', active: false },
+  { id: 't-0042', incidentId: 'INC-2611-0042', residentName: 'Juan Dela Cruz', residentInitials: 'JD', responderId: 'r3', category: 'medical', active: true },
+  { id: 't-0038', incidentId: 'INC-2611-0038', residentName: 'Juan Dela Cruz', residentInitials: 'JD', responderId: 'r8', category: 'medical', active: false },
 ];
 
 export const chatMessages: ChatMessage[] = [

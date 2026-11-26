@@ -1,8 +1,8 @@
 import { categoryMeta, clockTime, incidents, km, me, radius, responders, space, statusMeta, type IncidentStatus, type LatLng } from '@e-alert/shared';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { useRef } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Linking, PanResponder, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type MapView from 'react-native-maps';
 import type { Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,6 +44,52 @@ export default function ActiveIncident() {
   const region = useRef<Region>({ latitude: 14.4272, longitude: 120.9418, latitudeDelta: 0.016, longitudeDelta: 0.016 });
   const route = [responder.location, ...ROUTE.slice(1)];
 
+  // Bottom sheet: drag the header (or tap the grabber) to collapse/expand.
+  const [sheetH, setSheetH] = useState(0);
+  const [headerH, setHeaderH] = useState(0);
+  const [collapsed, setCollapsed] = useState(false);
+  const maxOffset = Math.max(0, sheetH - headerH - insets.bottom - space.md);
+  const maxRef = useRef(0);
+  const [offset] = useState(() => new Animated.Value(0));
+  const pos = useRef(0);
+  const dragStart = useRef(0);
+
+  const snap = (toCollapsed: boolean, velocity = 0) => {
+    const to = toCollapsed ? maxRef.current : 0;
+    pos.current = to;
+    setCollapsed(toCollapsed);
+    Animated.spring(offset, { toValue: to, velocity, useNativeDriver: true, bounciness: 0, speed: 16 }).start();
+  };
+  const toggleSheet = () => {
+    Haptics.selectionAsync();
+    snap(pos.current < maxRef.current / 2);
+  };
+  // Keep the drag limit in sync with layout; a collapsed sheet follows it.
+  useEffect(() => {
+    maxRef.current = maxOffset;
+    if (collapsed) { pos.current = maxOffset; offset.setValue(maxOffset); }
+  }, [maxOffset, collapsed, offset]);
+  // Refs below are read only inside gesture callbacks, never during render.
+  // eslint-disable-next-line react-hooks/refs
+  const [pan] = useState(() =>
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > 4 && Math.abs(g.dy) > Math.abs(g.dx),
+      onPanResponderGrant: () => {
+        offset.stopAnimation((v) => { dragStart.current = v; pos.current = v; });
+      },
+      onPanResponderMove: (_, g) => {
+        const v = Math.min(maxRef.current, Math.max(0, dragStart.current + g.dy));
+        pos.current = v;
+        offset.setValue(v);
+      },
+      onPanResponderRelease: (_, g) => {
+        const down = g.vy > 0.5 || (Math.abs(g.vy) <= 0.5 && pos.current > maxRef.current / 2);
+        snap(down, g.vy);
+      },
+      onPanResponderTerminate: () => snap(pos.current > maxRef.current / 2),
+    }),
+  );
+
   const zoom = (factor: number) => {
     const r = region.current;
     Haptics.selectionAsync();
@@ -52,7 +98,7 @@ export default function ActiveIncident() {
   const fitRoute = () => {
     Haptics.selectionAsync();
     map.current?.fitToCoordinates(route.map(toLatLng), {
-      edgePadding: { top: insets.top + 140, right: 80, bottom: 420, left: 40 },
+      edgePadding: { top: insets.top + 140, right: 80, bottom: collapsed ? headerH + insets.bottom + 60 : 420, left: 40 },
       animated: true,
     });
   };
@@ -97,15 +143,19 @@ export default function ActiveIncident() {
             <View style={[styles.liveDot, { backgroundColor: c.critical }]} />
             <Text variant="subhead" weight="600">Live · {cat.label}</Text>
           </Glass>
-          <View style={{ width: 48 }} />
+          <Glass style={styles.banner}>
+            <View
+              style={styles.bannerInner}
+              accessible
+              accessibilityLabel={arrived ? 'Your responder has arrived' : 'Your responder is on the way'}
+              accessibilityLiveRegion="polite">
+              <Icon name={arrived ? 'pin' : 'car'} size={18} color={arrived ? c.safe : c.action} />
+              <Text variant="subhead" weight="600" numberOfLines={1} style={{ flexShrink: 1 }}>
+                {arrived ? 'Arrived' : 'On the way'}
+              </Text>
+            </View>
+          </Glass>
         </GlassGroup>
-
-        <Glass style={styles.banner}>
-          <Icon name={arrived ? 'pin' : 'car'} size={18} color={arrived ? c.safe : c.action} />
-          <Text variant="subhead" weight="600" style={{ flex: 1 }} accessibilityLiveRegion="polite">
-            {arrived ? 'Your responder has arrived' : 'Your responder is on the way'}
-          </Text>
-        </Glass>
 
         <GlassGroup style={styles.controls} spacing={0}>
           <Glass style={styles.controlStack}>
@@ -119,11 +169,25 @@ export default function ActiveIncident() {
       </View>
 
       {/* Content layer: solid panel */}
-      <View style={[styles.panel, { backgroundColor: c.surface, paddingBottom: insets.bottom + space.md }, shadow(c, -4, 24)]}>
-        <View style={[styles.grabber, { backgroundColor: c.fillStrong }]} />
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.xl }}>
+      <Animated.View
+        onLayout={(e) => setSheetH(e.nativeEvent.layout.height)}
+        style={[
+          styles.panel,
+          { backgroundColor: c.surface, paddingBottom: insets.bottom + space.md, transform: [{ translateY: offset }] },
+          shadow(c, -4, 24),
+        ]}>
+        {/* Drag handle area: grabber + responder stay visible when collapsed */}
+        <View {...pan.panHandlers} onLayout={(e) => setHeaderH(e.nativeEvent.layout.height)}>
+          <Pressable
+            onPress={toggleSheet}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel={collapsed ? 'Expand details' : 'Collapse details'}
+            style={styles.grabberHit}>
+            <View style={[styles.grabber, { backgroundColor: c.fillStrong }]} />
+          </Pressable>
           {/* Responder */}
-          <View style={styles.responder}>
+          <View style={[styles.responder, { paddingHorizontal: space.xl }]}>
             <Avatar initials={responder.initials} size={52} />
             <View style={{ flex: 1 }}>
               <Text variant="headline">{responder.name}</Text>
@@ -134,12 +198,24 @@ export default function ActiveIncident() {
             </View>
           </View>
 
-          {/* Stat tiles */}
-          <View style={styles.tiles}>
+          {/* Stat tiles: stay visible when collapsed */}
+          <View style={[styles.tiles, { paddingHorizontal: space.xl }]}>
             <StatTile icon="clock" value={arrived ? 'Here' : `~${inc.etaMinutes} min`} label="Estimated arrival" />
             <StatTile icon="location" value={km(inc.distanceKm ?? 0)} label="Road distance" />
           </View>
-
+        </View>
+        <Animated.View
+          pointerEvents={collapsed ? 'none' : 'auto'}
+          style={{
+            flexShrink: 1,
+            // Hide Call/Message and the rest when collapsed; only the header shows.
+            opacity: offset.interpolate({
+              inputRange: [0, Math.max(1, maxOffset * 0.6), Math.max(2, maxOffset * 0.9)],
+              outputRange: [1, 1, 0],
+              extrapolate: 'clamp',
+            }),
+          }}>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: space.xl }}>
           <View style={{ flexDirection: 'row', gap: space.sm }}>
             <Button label="Call" icon="phone" tone="safe" size="medium" style={{ flex: 1 }} onPress={() => Linking.openURL('tel:+639175550101')} />
             <Button
@@ -194,7 +270,8 @@ export default function ActiveIncident() {
             style={{ marginTop: space.xs }}
           />
         </ScrollView>
-      </View>
+        </Animated.View>
+      </Animated.View>
     </View>
   );
 }
@@ -221,16 +298,18 @@ function StatTile({ icon, value, label }: { icon: IconName; value: string; label
 
 const styles = StyleSheet.create({
   top: { position: 'absolute', left: space.lg, right: space.lg, gap: space.sm },
-  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  topBar: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   livePill: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 48, paddingHorizontal: 18, borderRadius: 24 },
   liveDot: { width: 8, height: 8, borderRadius: 4 },
-  banner: { flexDirection: 'row', alignItems: 'center', gap: space.sm, height: 44, paddingHorizontal: space.lg, borderRadius: 22 },
+  banner: { flex: 1, height: 48, paddingHorizontal: 14, borderRadius: 24, justifyContent: 'center' },
+  bannerInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   controls: { alignSelf: 'flex-end', gap: space.sm, alignItems: 'center', marginTop: space.xs },
   controlStack: { width: 46, borderRadius: 23, alignItems: 'center', paddingVertical: 2 },
   controlBtn: { width: 46, height: 44, alignItems: 'center', justifyContent: 'center' },
   controlSep: { width: 24, height: StyleSheet.hairlineWidth },
   panel: { position: 'absolute', left: 0, right: 0, bottom: 0, maxHeight: '56%', borderTopLeftRadius: radius.lg + 4, borderTopRightRadius: radius.lg + 4, borderCurve: 'continuous', paddingTop: space.sm },
-  grabber: { alignSelf: 'center', width: 36, height: 5, borderRadius: 3, marginBottom: space.md },
+  grabberHit: { alignSelf: 'stretch', alignItems: 'center', paddingBottom: space.md },
+  grabber: { width: 36, height: 5, borderRadius: 3 },
   responder: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginBottom: space.lg },
   tiles: { flexDirection: 'row', gap: space.sm, marginBottom: space.md },
   tile: { flex: 1, borderRadius: radius.md, borderCurve: 'continuous', padding: space.md, alignItems: 'center' },
