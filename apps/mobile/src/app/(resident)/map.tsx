@@ -6,7 +6,10 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { router } from 'expo-router';
+
 import { MapCanvas, MeMarker, SymbolMarker } from '@/features/MapCanvas';
+import { useApp } from '@/state/app';
 import { Glass, GlassGroup } from '@/ui/Glass';
 import { Icon } from '@/ui/Icon';
 import { Button, StatusPill } from '@/ui/primitives';
@@ -26,6 +29,7 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 export default function MapTab() {
   const c = useColors();
+  const { activeIncident } = useApp();
   const [filter, setFilter] = useState<Filter>('all');
   const open = incidents.filter((i) => i.status !== 'resolved' && i.reporterName !== me.name);
   const shown = filter === 'all' ? open : filter === 'evac' ? [] : open.filter((i) => i.category === filter);
@@ -82,7 +86,18 @@ export default function MapTab() {
 
       {/* Bottom card (content layer) */}
       <View style={[styles.cardWrap, { bottom: TAB_BAR_CLEARANCE - 10 }]}>
-        {filter === 'evac' ? (
+        {activeIncident ? (
+          <View style={[styles.card, styles.trackCard, { backgroundColor: c.surface }, shadow(c, 6, 20)]}>
+            <View style={[styles.catIcon, { backgroundColor: c.action }]}>
+              <Icon name="car" size={20} color="#fff" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text variant="headline">Help is on the way</Text>
+              <Text variant="footnote" color="secondaryLabel">Nurse Joy Aquino · about 3 min</Text>
+            </View>
+            <Button label="Track" icon="location" tone="action" size="medium" onPress={() => router.push('/incident')} accessibilityHint="Opens live tracking of your responder" />
+          </View>
+        ) : filter === 'evac' ? (
           <View style={[styles.card, { backgroundColor: c.surface }, shadow(c, 6, 20)]}>
             <Text variant="headline" style={{ marginBottom: space.sm }}>Evacuation centers</Text>
             {evacuationCenters.map((e) => {
@@ -156,6 +171,7 @@ export default function MapTab() {
 const styles = StyleSheet.create({
   chip: { height: 40, paddingHorizontal: 16, borderRadius: 20, justifyContent: 'center' },
   cardWrap: { position: 'absolute', left: space.lg, right: space.lg },
+  trackCard: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   card: { borderRadius: radius.lg, borderCurve: 'continuous', padding: space.lg },
   catIcon: { width: 40, height: 40, borderRadius: 12, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
   done: { flexDirection: 'row', alignItems: 'center', gap: space.sm, padding: space.md, borderRadius: radius.sm, marginTop: space.md },

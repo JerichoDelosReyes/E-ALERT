@@ -48,10 +48,13 @@ function CapsuleBar({ tabs, state, navigateToTab }: BarProps) {
               onPress={onPress}
               accessibilityRole="tab"
               accessibilityState={{ selected: focused }}
-              accessibilityLabel={spec.label}
+              accessibilityLabel={spec.badge ? `${spec.label}, ${spec.badge} unread` : spec.label}
               style={styles.item}>
               <View style={[styles.itemInner, focused && { backgroundColor: c.fill }]}>
-                <Icon name={spec.icon} size={22} color={focused ? c.brand : c.label} />
+                <View>
+                  <Icon name={spec.icon} size={22} color={focused ? c.brand : c.label} />
+                  {spec.badge ? <View style={[styles.dot, { backgroundColor: c.critical, borderColor: c.surface }]} /> : null}
+                </View>
                 <Text variant="caption" weight={focused ? '600' : '500'} style={{ color: focused ? c.brand : c.label, fontSize: 10, lineHeight: 12 }}>
                   {spec.label}
                 </Text>
@@ -68,5 +71,6 @@ const styles = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20 },
   bar: { flexDirection: 'row', borderRadius: 34, padding: 4, height: 64 },
   item: { flex: 1 },
+  dot: { position: 'absolute', top: -2, right: -5, width: 10, height: 10, borderRadius: 5, borderWidth: 1.5 },
   itemInner: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2, borderRadius: 30 },
 });

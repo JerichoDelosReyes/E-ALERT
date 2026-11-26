@@ -1,7 +1,7 @@
 import { IMUS_CENTER, type LatLng } from '@e-alert/shared';
 import type { ReactNode, Ref } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
+import MapView, { Marker, Polyline, type Region } from 'react-native-maps';
 
 import { Avatar } from '@/ui/primitives';
 import { Icon } from '@/ui/Icon';
@@ -28,8 +28,8 @@ const androidDark = [
   { elementType: 'labels.text.fill', stylers: [{ color: '#8e8e93' }] },
 ];
 
-export function MapCanvas({ center = IMUS_CENTER, delta = 0.02, children, mapRef }: {
-  center?: LatLng; delta?: number; children?: ReactNode; mapRef?: Ref<MapView>;
+export function MapCanvas({ center = IMUS_CENTER, delta = 0.02, children, mapRef, onRegionChangeComplete }: {
+  center?: LatLng; delta?: number; children?: ReactNode; mapRef?: Ref<MapView>; onRegionChangeComplete?: (r: Region) => void;
 }) {
   const scheme = useScheme();
   return (
@@ -43,6 +43,7 @@ export function MapCanvas({ center = IMUS_CENTER, delta = 0.02, children, mapRef
       toolbarEnabled={false}
       userInterfaceStyle={scheme}
       customMapStyle={Platform.OS === 'android' ? (scheme === 'dark' ? androidDark : androidLight) : undefined}
+      onRegionChangeComplete={onRegionChangeComplete}
       accessibilityLabel="Map">
       {children}
     </MapView>
@@ -99,3 +100,5 @@ const styles = StyleSheet.create({
   pinTip: { width: 0, height: 0, borderLeftWidth: 7, borderRightWidth: 7, borderTopWidth: 9, borderLeftColor: 'transparent', borderRightColor: 'transparent', marginTop: -1 },
   sym: { alignItems: 'center', justifyContent: 'center', borderWidth: 2.5, borderColor: '#fff', boxShadow: '0px 4px 10px rgba(0,0,0,0.25)' },
 });
+
+export const toLatLng = toLL;

@@ -9,7 +9,7 @@ import { Incidents } from './pages/Incidents';
 import { LiveMap } from './pages/LiveMap';
 import { Responders } from './pages/Responders';
 import { Verification } from './pages/Verification';
-import { Avatar } from './ui';
+import { Avatar, Logo } from './ui';
 
 const open = incidents.filter((i) => i.status !== 'resolved').length;
 const pending = verificationQueue.filter((v) => v.state === 'pending').length;
@@ -34,9 +34,7 @@ export default function App() {
     <div className="shell">
       <nav className="sidebar glass" aria-label="Main">
         <div className="brand">
-          <span className="brand-mark" aria-hidden>
-            <svg width="16" height="16" viewBox="0 0 64 64"><circle cx="32" cy="38" r="7" fill="#fff" /><path d="M18 32a16 16 0 0 1 28 0M10 26a25 25 0 0 1 44 0" stroke="#fff" strokeWidth="6" fill="none" strokeLinecap="round" /></svg>
-          </span>
+          <Logo size={34} />
           <div><b>E-Alert</b><span>Imus Command</span></div>
         </div>
         {NAV.map((g) => (

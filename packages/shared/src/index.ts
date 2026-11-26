@@ -3,3 +3,4 @@ export * from './tokens';
 export * from './mock';
 export * from './geo';
 export * from './format';
+export * from './logo';

@@ -51,6 +51,7 @@ function Navigator() {
             contentStyle: { backgroundColor: Platform.OS === 'ios' ? 'transparent' : c.surface },
           }}
         />
+        <Stack.Screen name="chat/[id]" />
         <Stack.Screen name="incident" options={{ gestureEnabled: false, animation: 'slide_from_bottom' }} />
         <Stack.Screen name="offer" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
         <Stack.Screen

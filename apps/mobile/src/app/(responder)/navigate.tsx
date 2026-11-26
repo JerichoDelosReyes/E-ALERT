@@ -17,7 +17,8 @@ const SELF = responders[2];
 
 export default function Navigate() {
   const c = useColors();
-  const { assignment, markArrived, closeAssignment } = useApp();
+  const { assignment, markArrived, closeAssignment, unreadCount } = useApp();
+  const unread = unreadCount('t-0042');
 
   if (!assignment) {
     return (
@@ -86,19 +87,28 @@ export default function Navigate() {
           </View>
           {!assignment.arrived ? <Text variant="title3">{assignment.etaMinutes} min</Text> : null}
         </View>
-        <View style={{ flexDirection: 'row', gap: space.sm }}>
+        <View style={{ flexDirection: 'row', gap: space.sm, marginBottom: space.sm }}>
           <Button label="Backup" icon="backup" variant="tinted" tone="label" size="medium" style={{ flex: 1 }} onPress={requestBackup} />
-          {assignment.arrived ? (
-            <Button label="Close incident" icon="checkCircle" tone="label" size="medium" style={{ flex: 1.4 }}
-              onPress={() => Alert.alert('Close this incident?', 'It moves to the incident report.', [
-                { text: 'Not yet', style: 'cancel' },
-                { text: 'Close', onPress: () => { closeAssignment(); router.navigate('/duty'); } },
-              ])} />
-          ) : (
-            <Button label="I’ve arrived" icon="flag" tone="safe" size="medium" style={{ flex: 1.4 }}
-              onPress={() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); markArrived(); }} />
-          )}
+          <Button
+            label={unread ? `Message · ${unread}` : 'Message'}
+            icon="message"
+            variant="tinted"
+            tone="action"
+            size="medium"
+            style={{ flex: 1 }}
+            onPress={() => router.push('/chat/t-0042')}
+          />
         </View>
+        {assignment.arrived ? (
+          <Button label="Close incident" icon="checkCircle" tone="label" size="medium"
+            onPress={() => Alert.alert('Close this incident?', 'It moves to the incident report.', [
+              { text: 'Not yet', style: 'cancel' },
+              { text: 'Close', onPress: () => { closeAssignment(); router.navigate('/duty'); } },
+            ])} />
+        ) : (
+          <Button label="I’ve arrived" icon="flag" tone="safe" size="medium"
+            onPress={() => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); markArrived(); }} />
+        )}
       </View>
     </View>
   );

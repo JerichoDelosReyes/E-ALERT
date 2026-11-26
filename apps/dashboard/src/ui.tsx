@@ -1,4 +1,5 @@
 import {
+  LOGO_ARCS, LOGO_CORAL, LOGO_PIN, LOGO_RING_WIDTH, LOGO_VIEWBOX,
   availabilityMeta, categoryMeta, chartCategory, palette, statusMeta,
   type Availability, type Category, type IncidentStatus,
 } from '@e-alert/shared';
@@ -104,5 +105,15 @@ export function PageHead({ title, sub, children }: { title: string; sub?: string
       </div>
       {children ? <div style={{ display: 'flex', gap: 8 }}>{children}</div> : null}
     </header>
+  );
+}
+
+/** E-Alert mark. Transparent; the pin follows the text color in light and dark mode. */
+export function Logo({ size = 32 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox={LOGO_VIEWBOX} role="img" aria-label="E-Alert logo">
+      {LOGO_ARCS.map((d, i) => <path key={i} d={d} stroke={LOGO_CORAL} strokeWidth={LOGO_RING_WIDTH} fill="none" />)}
+      <path d={LOGO_PIN} fill="var(--label)" fillRule="evenodd" />
+    </svg>
   );
 }

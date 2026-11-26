@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApp } from '@/state/app';
 import { Icon, type IconName } from '@/ui/Icon';
+import { Logo } from '@/ui/Logo';
 import { Button } from '@/ui/primitives';
 import { Text } from '@/ui/Text';
 import { useColors } from '@/ui/theme';
@@ -46,9 +47,7 @@ export default function Onboarding() {
       <View style={{ flex: 1 }}>
         {step === 0 && (
           <Animated.View key="0" entering={enter} exiting={exit} style={styles.page}>
-            <View style={[styles.hero, { backgroundColor: c.brand, boxShadow: `0px 20px 40px ${c.sosTo}55` }]}>
-              <Icon name="wave" size={44} color="#fff" />
-            </View>
+            <Logo size={150} />
             <Text variant="largeTitle" align="center" style={{ marginTop: space.xxl }}>Help in three taps</Text>
             <Text variant="body" color="secondaryLabel" align="center" style={styles.lede}>
               E-Alert sends your location to the nearest verified responder in Imus, so you never have to explain where you are.

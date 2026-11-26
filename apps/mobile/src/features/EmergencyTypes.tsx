@@ -1,20 +1,19 @@
 import { categoryMeta, type Category, type Palette } from '@e-alert/shared';
 import * as Haptics from 'expo-haptics';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/ui/Icon';
 import { Text } from '@/ui/Text';
 import { useColors } from '@/ui/theme';
 
-/** What the person sees. Flood and Earthquake both map to the thesis "disaster" category. */
+/** The four thesis categories (Scope 2). Disaster covers flood and earthquake. */
 export type EmergencyType = { key: string; label: string; category: Category; sf: string; ion: string; color: keyof Palette };
 
 export const EMERGENCY_TYPES: EmergencyType[] = [
   { ...categoryMeta.medical, key: 'medical', label: 'Medical', category: 'medical' },
   { ...categoryMeta.fire, key: 'fire', label: 'Fire', category: 'fire' },
   { ...categoryMeta.police, key: 'police', label: 'Police', category: 'police' },
-  { key: 'flood', label: 'Flood', category: 'disaster', sf: 'water.waves', ion: 'water', color: 'info' },
-  { key: 'quake', label: 'Earthquake', category: 'disaster', sf: 'waveform.path', ion: 'pulse', color: 'warning' },
+  { ...categoryMeta.disaster, key: 'disaster', label: 'Disaster', category: 'disaster' },
 ];
 
 const SIZE = 64;
@@ -26,7 +25,7 @@ const SIZE = 64;
 export function EmergencyTypes({ selected, onSelect }: { selected: string | null; onSelect: (key: string | null) => void }) {
   const c = useColors();
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row} accessibilityRole="radiogroup">
+    <View style={styles.row} accessibilityRole="radiogroup">
       {EMERGENCY_TYPES.map((t) => {
         const on = selected === t.key;
         const dim = selected !== null && !on;
@@ -48,12 +47,13 @@ export function EmergencyTypes({ selected, onSelect }: { selected: string | null
           </Pressable>
         );
       })}
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { paddingHorizontal: 6, gap: 0, flexGrow: 1, justifyContent: 'center' },
+  // Four items spread across the full width, so each has clear space around it.
+  row: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 24 },
   item: { alignItems: 'center', gap: 6, width: 76 },
   ring: { padding: 3, borderRadius: (SIZE + 12) / 2, borderWidth: 2.5 },
   circle: { width: SIZE, height: SIZE, borderRadius: SIZE / 2, alignItems: 'center', justifyContent: 'center' },

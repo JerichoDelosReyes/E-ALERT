@@ -1,13 +1,14 @@
 import { ASSIGNMENT, categoryMeta, contacts, me, space } from '@e-alert/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EMERGENCY_TYPES, EmergencyTypes } from '@/features/EmergencyTypes';
 import { SOSButton } from '@/features/SOSButton';
 import { useApp } from '@/state/app';
 import { Icon } from '@/ui/Icon';
+import { Logo } from '@/ui/Logo';
 import { Avatar, Card, CircleButton } from '@/ui/primitives';
 import { TAB_BAR_CLEARANCE } from '@/ui/tabs';
 import { Text } from '@/ui/Text';
@@ -15,7 +16,9 @@ import { useColors } from '@/ui/theme';
 
 export default function Home() {
   const c = useColors();
-  const { activeIncident } = useApp();
+  const { activeIncident, messages, unreadCount } = useApp();
+  const unread = unreadCount('t-0042');
+  const lastIn = [...messages].reverse().find((m) => m.threadId === 't-0042' && m.from === 'responder');
   const [type, setType] = useState<string | null>(null);
   const picked = EMERGENCY_TYPES.find((t) => t.key === type);
 
@@ -29,14 +32,12 @@ export default function Home() {
       {/* Top bar */}
       <View style={[styles.pad, styles.topBar]}>
         <View style={styles.brandRow} accessible accessibilityRole="header" accessibilityLabel="E-Alert">
-          <View style={[styles.mark, { backgroundColor: c.brand }]}>
-            <Icon name="wave" size={15} color="#fff" />
-          </View>
+          <Logo size={34} />
           <Text variant="title3" weight="700">E-Alert</Text>
         </View>
-        <View style={{ flexDirection: 'row', gap: space.sm }}>
+        <View style={{ flexDirection: 'row', gap: space.md }}>
+          <Call911 />
           <CircleButton icon="bell" label="Notifications, 1 new" badge />
-          <CircleButton icon="help" label="How E-Alert works" />
         </View>
       </View>
 
@@ -65,7 +66,9 @@ export default function Home() {
             <View style={[styles.liveDot, { backgroundColor: c.critical }]} />
             <View style={{ flex: 1 }}>
               <Text variant="headline">Help is on the way</Text>
-              <Text variant="footnote" color="secondaryLabel">Nurse Joy Aquino · about 3 min</Text>
+              <Text variant="footnote" color={unread ? 'label' : 'secondaryLabel'} weight={unread ? '600' : '400'} numberOfLines={1}>
+                {unread && lastIn ? `Nurse Joy: ${lastIn.text}` : 'Nurse Joy Aquino · about 3 min'}
+              </Text>
             </View>
             <Icon name="chevron" size={14} color={c.secondaryLabel} />
           </Card>
@@ -98,11 +101,32 @@ export default function Home() {
   );
 }
 
+/** Direct line to the national hotline. Confirms first so a stray tap never dials. */
+function Call911() {
+  const c = useColors();
+  const call = () =>
+    Alert.alert('Call 911?', 'This calls the national emergency hotline directly.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Call 911', onPress: () => Linking.openURL('tel:911') },
+    ]);
+  return (
+    <Pressable
+      onPress={call}
+      accessibilityRole="button"
+      accessibilityLabel="Call 911"
+      accessibilityHint="Asks you to confirm, then calls the national emergency hotline."
+      style={({ pressed }) => [styles.call911, { backgroundColor: c.critical, opacity: pressed ? 0.8 : 1 }]}>
+      <Icon name="phone" size={15} color="#fff" />
+      <Text variant="headline" weight="700" style={{ color: '#fff' }}>911</Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  call911: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 44, paddingHorizontal: 16, borderRadius: 22 },
   pad: { paddingHorizontal: space.xl },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: space.md, marginTop: space.xs },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  mark: { width: 28, height: 28, borderRadius: 9, borderCurve: 'continuous', alignItems: 'center', justifyContent: 'center' },
   greet: { flexDirection: 'row', alignItems: 'center', marginBottom: space.lg },
   verified: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
   liveDot: { width: 10, height: 10, borderRadius: 5 },

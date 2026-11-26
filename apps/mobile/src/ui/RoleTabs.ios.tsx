@@ -14,6 +14,7 @@ export function RoleTabs({ tabs }: { tabs: TabSpec[] }) {
         <NativeTabs.Trigger key={t.name} name={t.name}>
           <NativeTabs.Trigger.Label>{t.label}</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon sf={ICONS[t.icon][0] as SFSymbol} />
+          <NativeTabs.Trigger.Badge hidden={!t.badge}>{t.badge ? String(t.badge) : undefined}</NativeTabs.Trigger.Badge>
         </NativeTabs.Trigger>
       ))}
     </NativeTabs>
