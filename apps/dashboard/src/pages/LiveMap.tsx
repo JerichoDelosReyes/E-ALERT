@@ -3,10 +3,17 @@ import { MapboxOverlay, type MapboxOverlayProps } from '@deck.gl/mapbox';
 import {
   categoryMeta, historicalPoints, IMUS_CENTER, incidents, responders, timeAgo, type Incident,
 } from '@e-alert/shared';
-import { RefreshCw, UserPlus } from 'lucide-react';
+import { ChevronLeft, RefreshCw, UserPlus } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { setWorkerUrl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import MapGL, { Marker, NavigationControl, useControl } from 'react-map-gl/maplibre';
+
+// MapLibre finds its tile worker next to its own file. Vite's dependency
+// pre-bundling moves maplibre-gl into .vite/deps without the worker, so the
+// worker fails to load and the map stays black. Point it at the real file.
+setWorkerUrl(maplibreWorkerUrl);
 
 import { AvailPill, Avatar, CAT_ICON, CatBadge, PriorityBar, StatusPill, useCatColors, useDark, usePalette } from '../ui';
 
@@ -25,15 +32,19 @@ const points = historicalPoints(500);
 
 /** Keep incidents in the part of the map not covered by floating panels. */
 function initialView() {
-  const phone = window.matchMedia('(max-width: 899px)').matches;
-  const tablet = !phone && window.matchMedia('(max-width: 1199px)').matches;
+  const mq = (q: string) => window.matchMedia(q).matches;
+  const phone = mq('(max-width: 599px)'); // bottom sheet
+  const small = !phone && mq('(max-width: 899px)'); // top bar + side panel
+  const tablet = !phone && !small && mq('(max-width: 1199px)'); // icon rail
   return {
     longitude: IMUS_CENTER.lng,
-    latitude: IMUS_CENTER.lat - 0.006,
-    zoom: phone ? 12.4 : 13.2,
+    latitude: phone ? IMUS_CENTER.lat - 0.006 : IMUS_CENTER.lat,
+    zoom: phone ? 12.4 : small ? 12.8 : 13.2,
     padding: phone
       ? { top: 130, bottom: Math.round(window.innerHeight * 0.46), left: 10, right: 10 }
-      : { top: 70, bottom: 80, left: tablet ? 90 : 260, right: tablet ? 340 : 360 },
+      : small
+        ? { top: 130, bottom: 20, left: 10, right: Math.min(340, window.innerWidth * 0.45) }
+        : { top: 70, bottom: 80, left: tablet ? 90 : 260, right: tablet ? 340 : 360 },
   };
 }
 
@@ -44,6 +55,10 @@ export function LiveMap() {
   const [layer, setLayer] = useState<'live' | 'heat'>('live');
   const active = useMemo(() => incidents.filter((i) => i.status !== 'resolved').sort((a, b) => b.priority - a.priority), []);
   const [sel, setSel] = useState<Incident>(active[0]);
+  // Phone bottom sheet: list ↔ detail view, and collapsed to just its header.
+  const [view, setView] = useState<'list' | 'detail'>('list');
+  const [collapsed, setCollapsed] = useState(false);
+  const pick = (i: Incident) => { setSel(i); setView('detail'); setCollapsed(false); };
   const responder = responders.find((r) => r.id === sel.responderId);
   const available = responders.filter((r) => r.availability === 'available').length;
 
@@ -61,7 +76,7 @@ export function LiveMap() {
   })] : [], [layer, dark]);
 
   return (
-    <div className="map-wrap">
+    <div className={`map-wrap${collapsed ? ' sheet-collapsed' : ''}`}>
       <MapGL
         initialViewState={initialView()}
         mapStyle={dark ? STYLE.dark : STYLE.light}
@@ -88,7 +103,7 @@ export function LiveMap() {
                 className={`marker${on ? ' sel' : ''}`}
                 style={{ background: cat[i.category] }}
                 aria-label={`${categoryMeta[i.category].label} incident in ${i.barangay}, priority ${i.priority}`}
-                onClick={() => setSel(i)}>
+                onClick={() => pick(i)}>
                 <I size={on ? 18 : 15} strokeWidth={2.4} />
               </button>
             </Marker>
@@ -105,18 +120,27 @@ export function LiveMap() {
         <div style={{ flex: 1 }} />
         <div className="seg" role="group" aria-label="Layer">
           <button aria-pressed={layer === 'live'} onClick={() => setLayer('live')}>Incidents</button>
-          <button aria-pressed={layer === 'heat'} onClick={() => setLayer('heat')}>Heatmap · 30 days</button>
+          <button aria-pressed={layer === 'heat'} onClick={() => setLayer('heat')}>Heatmap<span className="hide-sm"> · 30 days</span></button>
         </div>
       </div>
 
       {/* Incident queue + detail */}
-      <aside className="float incident-list glass" aria-label="Active incidents">
-        <div style={{ padding: '6px 10px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <b>Active incidents</b>
+      <aside
+        className={`float incident-list glass${view === 'detail' ? ' show-detail' : ''}${collapsed ? ' collapsed' : ''}`}
+        aria-label="Active incidents">
+        <button
+          className="sheet-handle"
+          aria-label={collapsed ? 'Expand incident panel' : 'Collapse incident panel'}
+          aria-expanded={!collapsed}
+          onClick={() => setCollapsed((c) => !c)}
+        />
+        <div className="inc-list-head">
+          <b>Active incidents <span className="muted tnum">· {active.length}</span></b>
           <span className="muted" style={{ fontSize: 12 }}>by priority</span>
         </div>
+        <div className="inc-rows">
         {active.map((i) => (
-          <button key={i.id} className="inc-row" aria-pressed={i.id === sel.id} onClick={() => setSel(i)}>
+          <button key={i.id} className="inc-row" aria-pressed={i.id === sel.id} onClick={() => pick(i)}>
             <CatBadge cat={i.category} />
             <span style={{ flex: 1, minWidth: 0 }}>
               <span style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
@@ -130,8 +154,12 @@ export function LiveMap() {
             </span>
           </button>
         ))}
+        </div>
 
-        <div className="detail" style={{ margin: 8, padding: 14, borderRadius: 14, background: 'var(--surface)' }}>
+        <div className="detail">
+          <button className="btn sheet-back" onClick={() => setView('list')}>
+            <ChevronLeft size={16} /> All incidents
+          </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <CatBadge cat={sel.category} size={36} />
             <div>
@@ -170,7 +198,7 @@ export function LiveMap() {
             ))}
           </ol>
 
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button className="btn primary"><RefreshCw size={14} /> Reassign</button>
             <button className="btn"><UserPlus size={14} /> Add backup</button>
           </div>

@@ -98,6 +98,9 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .map-toolbar { top: 10px; left: 260px; right: 10px; height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 10px 0 16px; border-radius: 18px; }
 .map-toolbar h1 { font-size: 15px; margin: 0; letter-spacing: -0.2px; }
 .incident-list { top: 72px; right: 10px; width: 340px; max-height: calc(100% - 82px); overflow: auto; padding: 8px; }
+.inc-list-head { padding: 6px 10px 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sheet-handle, .sheet-back { display: none; }
+.detail { margin: 8px; padding: 14px; border-radius: 14px; background: var(--surface); }
 .inc-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px; border-radius: 14px; width: 100%; text-align: left; border: 0; background: transparent; }
 .inc-row:hover { background: var(--fill); }
 .inc-row[aria-pressed='true'] { background: var(--fillStrong); }
@@ -192,12 +195,35 @@ table.tbl { width: 100%; border-collapse: collapse; }
   .card-pad { padding: 14px 16px; }
   .tbl th, .tbl td { padding: 10px 12px; }
 
-  /* Live map: toolbar under the top bar, incidents as a bottom sheet */
-  .map-toolbar { top: 68px; left: 8px; right: 8px; height: auto; min-height: 48px; padding: 6px 8px 6px 14px; flex-wrap: wrap; }
+  /* Live map: toolbar under the top bar, incidents as a side panel */
+  .map-toolbar { top: 68px; left: 8px; right: 8px; height: auto; min-height: 48px; padding: 6px 8px 6px 14px; gap: 8px; }
   .map-toolbar h1 { display: none; }
   .stats { display: none; }
-  .incident-list { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 46%; border-radius: 22px; }
-  .map-wrap .maplibregl-ctrl-bottom-right { bottom: calc(46% + 12px); }
+  .incident-list { top: 126px; right: 8px; bottom: 8px; width: min(340px, 45vw); max-height: none; border-radius: 22px; }
+  .map-wrap .maplibregl-ctrl-bottom-right { right: calc(min(340px, 45vw) + 8px); }
+}
+
+/* Small phone: incidents as a collapsible bottom sheet that flips between list and detail */
+@media (max-width: 599px) {
+  .map-toolbar { padding: 4px 4px 4px 12px; }
+  .incident-list {
+    top: auto; left: 8px; right: 8px; width: auto; max-height: 48%;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    padding-top: 0; overscroll-behavior: contain;
+  }
+  .incident-list.collapsed { overflow: hidden; }
+  .incident-list.collapsed .inc-rows, .incident-list.collapsed .detail { display: none; }
+  .incident-list.show-detail .inc-list-head, .incident-list.show-detail .inc-rows { display: none; }
+  .incident-list:not(.show-detail) .detail { display: none; }
+  .sheet-handle {
+    display: block; position: sticky; top: 0; z-index: 1; width: 100%; height: 22px; border: 0; padding: 0;
+    background: transparent; border-radius: 0;
+  }
+  .sheet-handle::before { content: ''; display: block; width: 40px; height: 5px; margin: 8px auto 0; border-radius: 3px; background: var(--fillStrong); }
+  .sheet-back { display: inline-flex; margin: -4px 0 10px -6px; background: transparent; padding: 0 8px; }
+  .detail { margin: 0 4px 6px; padding: 12px; }
+  .map-wrap .maplibregl-ctrl-bottom-right { right: 0; bottom: calc(48% + 12px); }
+  .map-wrap.sheet-collapsed .maplibregl-ctrl-bottom-right { bottom: 84px; }
 }
 
 @media (max-width: 899px) { .hide-md { display: none; } }
